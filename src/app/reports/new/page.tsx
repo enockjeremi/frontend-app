@@ -1,14 +1,19 @@
 import React from "react";
 
+//Types
 import { FormType } from "@/app/types/report.type";
-import Form from "../components/form";
-import HeaderContentNew from "../components/header-content-new";
+import { GetCategoryResponse } from "@/app/types/category.type";
 
-import { getDataCategories } from "@/app/lib/getDataFunctions";
-import HeaderContent from "../[id]/components/header-content";
+//Components
+import Form from "@/app/reports/components/form";
+import HeadSections from "@/app/common/head-section";
+
+//Feching data
+import HTTPMethod from "@/app/lib/http-method";
+import { endPoints } from "@/app/lib/api";
 
 const Page = async () => {
-  const data = await getDataCategories();
+  const data = await HTTPMethod.get<GetCategoryResponse[]>(endPoints.categories.get);
   const form: FormType = {
     reportName: "",
     carModel: "",
@@ -20,13 +25,18 @@ const Page = async () => {
     reportFix: "",
     mileage: "",
   };
+
+  const startContent = () => {
+    return <h1>Registra un nuevo reporte</h1>;
+  };
+  const endContent = () => {
+    return <h2></h2>;
+  };
+
   return (
     <>
-      <header className="w-full border-b flex space-y-2 flex-wrap py-2 justify-between items-center  border-black/50">
-        <HeaderContent textLabel="Agregar nuevo reporte">
-          <span>Agregar</span>
-        </HeaderContent>
-      </header>
+      <HeadSections startContent={startContent} endContent={endContent} />
+
       <section className="w-full flex flex-col justify-center items-center my-3">
         <Form isNew={true} form={form} categories={data} />
       </section>

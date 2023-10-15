@@ -1,14 +1,11 @@
 "use client";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Link,
-} from "@nextui-org/react";
+import React from "react";
 import NextLink from "next/link";
 
-import { GetReportResponse } from "@/app/types/report.type";
+import { Card, CardHeader, CardBody, CardFooter } from "@nextui-org/card";
+import { Link } from "@nextui-org/link";
+
+import { Reports } from "@/app/types/report.type";
 import { limitCharacter } from "@/app/lib/utility";
 
 export default function CardReport({
@@ -17,7 +14,7 @@ export default function CardReport({
   carYear,
   reportFault,
   id,
-}: GetReportResponse) {
+}: Reports) {
   return (
     <div className="w-full flex items-center justify-center">
       <Card className="w-full rounded-md shadow-none border sm:min-h-[180px] border-black/20  lg:max-w-[340px]">

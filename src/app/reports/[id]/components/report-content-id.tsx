@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
-import { Button, Link } from "@nextui-org/react";
-import { GetReportResponse } from "@/app/types/report.type";
-
-import TextContent from "../../components/text-content";
+import { Button } from "@nextui-org/button";
+import { Link } from "@nextui-org/link";
+import { Reports } from "@/app/types/report.type";
+import TextContent from "@/app/reports/components/text-content";
 
 interface Props {
-  data: GetReportResponse;
+  data: Reports;
 }
 const ReportContentId = ({ data }: Props) => {
   return (
@@ -51,7 +51,7 @@ const ReportContentId = ({ data }: Props) => {
           {data.reportFault}
         </TextContent>
         <TextContent textLabel="Diagnostico realizado">
-          textContent={data.reportDiagnostic}
+          {data.reportDiagnostic}
         </TextContent>
         <TextContent textLabel="Solucion presentada">
           {data.reportFix}

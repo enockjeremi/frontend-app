@@ -1,32 +1,33 @@
+import React from "react";
 
-import HeaderContentMain from "./components/home-page/header-main/header-main-content";
-import CardReport from "./components/home-page/report-card/card-report";
-import { getDataReport } from "./lib/getDataFunctions";
+//Feching functions
+import HTTPMethod from "./lib/http-method";
+//Types
+import { GetReportResponse } from "./types/report.type";
+
+//Components
+import InputForServer from "./components/server-components/input-server";
+import HeadSections from "./common/head-section";
+import InfinityContent from "./components/infinity-content";
+import { endPoints } from "./lib/api";
+
 
 export default async function Home() {
-  const data = await getDataReport();
+  const data = await HTTPMethod.get<GetReportResponse>(
+    endPoints.reports.pagination(9, 0)
+  );
 
+  const startContent = () => {
+    return <h1>Reportes de diagnosticos</h1>;
+  };
+  const endContent = () => {
+    return <InputForServer className="w-full" />;
+  };
   return (
     <>
-      <header className="w-full border-b flex space-y-2 flex-wrap py-2 justify-between items-center  border-black/50">
-        <HeaderContentMain />
-      </header>
-      <section className="w-full grid grid-cols-1 justify-center items-center sm:grid-cols-2 lg:grid-cols-3 gap-2 my-3">
-        {data.map((report) => (
-          <CardReport
-            key={report.id}
-            id={report.id}
-            reportName={report.reportName}
-            carModel={report.carModel}
-            carYear={report.carYear}
-            categoryName={report.categoryName}
-            mileage={report.mileage}
-            reportDiagnostic={report.reportDiagnostic}
-            reportDtc={report.reportDtc}
-            reportFault={report.reportFault}
-            reportFix={report.reportFix}
-          />
-        ))}
+      <HeadSections startContent={startContent} endContent={endContent} />
+      <section className="w-full my-2">
+        <InfinityContent data={data} />
       </section>
     </>
   );

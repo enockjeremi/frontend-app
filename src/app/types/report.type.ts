@@ -1,6 +1,17 @@
-import { GetCategoryResponse } from "./category.type";
+import { GetCategoryResponse } from "@/app/types/category.type";
 
-export type GetReportResponse = {
+export interface GetReportResponse {
+  items: Reports[];
+  meta: Meta;
+}
+
+export interface Meta {
+  totalItems: number;
+  itemsPerPage: number;
+  pageCount: number;
+}
+
+export type Reports = {
   id: number;
   reportName: string;
   carModel: string;
@@ -13,7 +24,6 @@ export type GetReportResponse = {
   categoryName: GetCategoryResponse;
 };
 
-
 export type FormType = {
   reportName: string;
   carModel: string;
@@ -25,5 +35,3 @@ export type FormType = {
   mileage: string;
   categoryNameId: number;
 };
-
-

@@ -1,19 +1,37 @@
 import React from "react";
 
-import { GetReportResponse } from "@/app/types/report.type";
+//Types
+import { GetReportResponse, Reports } from "@/app/types/report.type";
 
-import { getDataReportById } from "@/app/lib/getDataFunctions";
-
+//Components
 import ReportContentId from "./components/report-content-id";
-import HeaderContentId from "./components/header-content-id";
+import HeadSections from "@/app/common/head-section";
+import DeleteEditButtons from "./components/delete-edit-buttons";
+
+//FETCHING DATA
+import { endPoints } from "@/app/lib/api";
+import HTTPMethod from "@/app/lib/http-method";
+
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const data = await HTTPMethod.get<GetReportResponse>(endPoints.reports.get);
+  return data.items.map((report) => ({ id: report.id.toString() }));
+}
 
 const Page = async ({ params }: { params: { id: number } }) => {
-  const data: GetReportResponse = await getDataReportById(params.id);
+  const data = await HTTPMethod.get<Reports>(
+    endPoints.reports.getById(params.id)
+  );
+  const startContent = () => {
+    return `Reporte de diagnostico #${params.id}`;
+  };
+  const endContent = () => {
+    return <DeleteEditButtons id={params.id} />;
+  };
   return (
     <>
-      <header className="w-full border-b flex space-y-2 flex-wrap py-2 justify-between items-center  border-black/50">
-        <HeaderContentId id={data.id} />
-      </header>
+      <HeadSections startContent={startContent} endContent={endContent} />
       <section className="w-full flex flex-col justify-center items-center my-3">
         <ReportContentId data={data} />
       </section>

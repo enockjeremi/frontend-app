@@ -1,8 +1,11 @@
 "use client";
-import { Button } from "@nextui-org/react";
 import NextLink from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
+//Components UI
+import { Button } from "@nextui-org/button";
+
+//Icons
 import IconPlus from "@/app/common/icons/plus-icon";
 import ArrowBack from "@/app/common/icons/arrow-back-icon";
 
@@ -15,6 +18,7 @@ export const ButtonBack = () => {
     )
   );
 };
+
 export const ButtonQuery = () => {
   return (
     <>

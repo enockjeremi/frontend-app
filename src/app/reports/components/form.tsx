@@ -3,29 +3,34 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 
-import { joiResolver } from "@hookform/resolvers/joi";
-import {
-  Button,
-  Divider,
-  Input,
-  Select,
-  SelectItem,
-  Textarea,
-} from "@nextui-org/react";
+//Schema validations and resolvers
 import Joi from "joi";
+import { joiResolver } from "@hookform/resolvers/joi";
 
+//Component UI
+import { Button } from "@nextui-org/button";
+import { Divider } from "@nextui-org/divider";
+import { Select, SelectItem } from "@nextui-org/select";
+import { Input, Textarea } from "@nextui-org/input";
+
+//Types
 import { FormType } from "@/app/types/report.type";
 import { GetCategoryResponse } from "@/app/types/category.type";
 
+//Icon
 import IconPlus from "@/app/common/icons/plus-icon";
-import {
-  createReport,
-  revalidate_tag,
-  updateReport,
-} from "@/app/lib/getDataFunctions";
-import { useMessage } from "@/app/context/message-context";
+
+//Fetching functions
+import HTTPMethod from "@/app/lib/http-method";
 import { endPoints } from "@/app/lib/api";
+
+//Context
+import { useMessage } from "@/app/context/message-context";
+
+//Components
 import TextContent from "./text-content";
+import Swal from "sweetalert2";
+import { Spinner } from "@nextui-org/spinner";
 
 interface Props {
   isNew: boolean;
@@ -49,6 +54,7 @@ const schema = Joi.object({
 const Form = ({ isNew, form, categories, id }: Props) => {
   const router = useRouter();
   const [dtc, setDtc] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useMessage();
   const {
     register,
@@ -73,25 +79,41 @@ const Form = ({ isNew, form, categories, id }: Props) => {
 
   const onSubmit: SubmitHandler<FormType> = async (data) => {
     if (isNew) {
-      await createReport(data)
-        .then(async (resolve) => {
-          setMessage(resolve);
-          const res = await revalidate_tag();
-          if (res) router.push("/");
+      setIsLoading(true);
+      await HTTPMethod.post<FormType>(endPoints.reports.create, data)
+        .then((resolve) => {
+          setMessage(resolve.message);
+          router.push("/");
+          router.refresh();
         })
         .catch((error) => {
-          setMessage(error);
+          setMessage(error.message);
         });
     } else {
-      await updateReport(data, id)
-        .then(async (resolve) => {
-          setMessage(resolve);
-          const res = await revalidate_tag();
-          if (res) router.push(`/reports/${id}`);
-        })
-        .catch((error) => {
-          setMessage(error);
-        });
+      Swal.fire({
+        title: "¿Guardar cambios?",
+        showCancelButton: true,
+        cancelButtonColor: "rgb(239 68 68 / 1)",
+        cancelButtonText: "Cancelar",
+        confirmButtonText: "Guardar",
+        confirmButtonColor: "rgb(34 197 94 / 1)",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          setIsLoading(true);
+          await HTTPMethod.put<FormType>(endPoints.reports.updateById(id), data)
+            .then(async (resolve) => {
+              setMessage(resolve.message);
+              router.push(`/reports/${id}`);
+              router.refresh();
+            })
+            .catch((error) => {
+              setMessage(error.message);
+            });
+          Swal.fire("Modificado", "", "success");
+        } else if (result.isDenied) {
+          Swal.fire("Changes are not saved", "", "info");
+        }
+      });
     }
   };
 
@@ -99,14 +121,13 @@ const Form = ({ isNew, form, categories, id }: Props) => {
     <>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col w-full space-y-3"
+        className="flex flex-col w-full space-y-0"
       >
         <TextContent textLabel="Nombre de el reporte">
           <Input
             {...register("reportName")}
             type="text"
             className="w-full"
-            variant={"bordered"}
             labelPlacement={"outside"}
             placeholder="Ej: Cambio de embrague"
           />
@@ -116,12 +137,11 @@ const Form = ({ isNew, form, categories, id }: Props) => {
             </span>
           )}
         </TextContent>
-        <div className="w-full flex justify-start items-start  gap-2">
+        <div className="w-full flex flex-col sm:flex-row justify-start items-start  gap-2">
           <TextContent textLabel="Modelo">
             <Input
               {...register("carModel")}
               type="text"
-              variant={"bordered"}
               placeholder="Ej: Santa Fe"
             />
             {errors.carModel && (
@@ -134,7 +154,6 @@ const Form = ({ isNew, form, categories, id }: Props) => {
             <Input
               {...register("carYear")}
               type="text"
-              variant={"bordered"}
               placeholder="Ej: 2012"
               maxLength={4}
             />
@@ -150,7 +169,7 @@ const Form = ({ isNew, form, categories, id }: Props) => {
             )}
           </TextContent>
         </div>
-        <div className="w-full flex justify-start items-start  gap-2">
+        <div className="w-full flex flex-col sm:flex-row justify-start items-start  gap-2">
           <TextContent textLabel="Categoria">
             <Select
               size="sm"
@@ -161,7 +180,7 @@ const Form = ({ isNew, form, categories, id }: Props) => {
             >
               {categories?.map((category) => (
                 <SelectItem key={category.id} value={Number(category.id)}>
-                  {category.categoryName}
+                  {category.categoryName.toUpperCase()}
                 </SelectItem>
               ))}
             </Select>
@@ -178,7 +197,6 @@ const Form = ({ isNew, form, categories, id }: Props) => {
           <TextContent textLabel="Kilometraje">
             <Input
               type="text"
-              variant={"bordered"}
               placeholder="Ej: 89243"
               {...register("mileage")}
             />
@@ -199,7 +217,6 @@ const Form = ({ isNew, form, categories, id }: Props) => {
               value={dtc.toUpperCase()}
               radius="sm"
               onChange={(e) => setDtc(e.target.value)}
-              variant={"bordered"}
               label="Codigos DTCs"
             />
             <Button
@@ -232,7 +249,6 @@ const Form = ({ isNew, form, categories, id }: Props) => {
         <TextContent textLabel="Fallas reportadas">
           <Textarea
             {...register("reportFault")}
-            variant={"bordered"}
             labelPlacement="outside"
             placeholder="Fallas presentadas por el vehiculo."
             className="col-span-12 md:col-span-6 mb-6 md:mb-0"
@@ -246,7 +262,6 @@ const Form = ({ isNew, form, categories, id }: Props) => {
         <TextContent textLabel="Diagnostico realizado">
           <Textarea
             {...register("reportDiagnostic")}
-            variant={"bordered"}
             labelPlacement="outside"
             placeholder="Fallas presentadas por el vehiculo."
             className="col-span-12 md:col-span-6 mb-6 md:mb-0"
@@ -260,7 +275,6 @@ const Form = ({ isNew, form, categories, id }: Props) => {
         <TextContent textLabel="Solucion presentada">
           <Textarea
             {...register("reportFix")}
-            variant={"bordered"}
             labelPlacement="outside"
             placeholder="Fallas presentadas por el vehiculo."
             className="col-span-12 md:col-span-6 mb-6 md:mb-0"
@@ -271,8 +285,13 @@ const Form = ({ isNew, form, categories, id }: Props) => {
             </span>
           )}
         </TextContent>
-        <Button type="submit" color="default" className="uppercase">
-          {isNew ? "Agregar" : "Modificar"}
+        <Button
+          type="submit"
+          isDisabled={isLoading && true}
+          color="default"
+          className={`uppercase`}
+        >
+          {isLoading ? <Spinner size="sm" /> : isNew ? "Agregar" : "Modificar"}
         </Button>
       </form>
     </>
