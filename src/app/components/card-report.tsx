@@ -35,7 +35,7 @@ export default function CardReport({
           <span className="font-semibold text-default-500 mb-1">
             Falla presentada:
           </span>
-          <div className="flex w-full flex-col">
+          <div className="flex w-full flex-col first-letter:uppercase">
             {limitCharacter(reportFault)}
           </div>
         </CardBody>
