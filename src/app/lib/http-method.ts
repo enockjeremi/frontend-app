@@ -1,26 +1,7 @@
-import { endPoints } from "./api";
-
-export async function fetchData<T>(url: string) {
-  try {
-    const res = await fetch(url, {
-      next: { tags: ["reports"] },
-    });
-    if (!res.ok) {
-      throw new Error("No se han podido cargar los datos.");
-    }
-    return (await res.json()) as T;
-  } catch (error) {
-    throw new Error("No se han podido cargar los datos.");
-  }
-}
-const revalidate = 0
-
 export default class HTTPMethod {
   static async get<T>(url: string) {
     try {
-      const response = await fetch(url, {
-        next: { revalidate: revalidate },
-      });
+      const response = await fetch(url, { cache: "no-store" });
       if (!response.ok) {
         throw new Error("No se han podido cargar los datos.");
       }

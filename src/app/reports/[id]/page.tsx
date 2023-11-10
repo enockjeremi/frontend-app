@@ -12,8 +12,6 @@ import DeleteEditButtons from "./components/delete-edit-buttons";
 import { endPoints } from "@/app/lib/api";
 import HTTPMethod from "@/app/lib/http-method";
 
-export const dynamicParams = false;
-
 export async function generateStaticParams() {
   const data = await HTTPMethod.get<GetReportResponse>(endPoints.reports.get);
   return data.items.map((report) => ({ id: report.id.toString() }));

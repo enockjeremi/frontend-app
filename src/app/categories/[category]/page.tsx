@@ -12,7 +12,6 @@ import InfinityContentByCategory from "./components/infinity-content-by-category
 import InputForServer from "../../components/server-components/input-server";
 import HeadSections from "../../common/head-section";
 import { GetCategoryResponse } from "@/app/types/category.type";
-import { replaceCharacters } from "@/app/lib/utility";
 
 export const dynamicParams = false;
 
@@ -20,12 +19,11 @@ export async function generateStaticParams() {
   const data = await HTTPMethod.get<GetCategoryResponse[]>(
     endPoints.categories.get
   );
-  const categories = data.map((category) => {
-    const name = category.categoryName.toString()
-    return { category: name };
-  });
+  
+  return data.map((category) => ({
+    category: category.categoryName.toString().toLowerCase()
+  }));
 
-  return categories;
 }
 
 const Page = async ({ params }: { params: { category: string } }) => {
